@@ -582,15 +582,15 @@
 
     .grid-item.img-revealed .img-clip {
       transform: translateY(0);
-      transition: transform 1.1s cubic-bezier(0.76, 0, 0.24, 1);
+      transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .grid-item img {
       width: 100%;
       height: 100%;
       object-fit: cover;
-      transform: scale(1.1);
-      transition: transform 1.1s cubic-bezier(0.76, 0, 0.24, 1), opacity 0.4s ease;
+      transform: scale(1.06);
+      transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
       will-change: transform;
     }
 
@@ -1275,18 +1275,17 @@
        IMAGE CLIP-PATH REVEAL ON SCROLL
     ══════════════════════════════════════ */
     const imgObserver = new IntersectionObserver((entries) => {
-      entries.forEach((entry, i) => {
+      entries.forEach((entry) => {
         if (entry.isIntersecting) {
           const item = entry.target;
-          // stagger within view
-          const delay = (parseInt(item.dataset.index || '0', 10) % 4) * 80;
+          const delay = (parseInt(item.dataset.index || '0', 10) % 4) * 35;
           setTimeout(() => {
             item.classList.add('img-revealed');
           }, delay);
           imgObserver.unobserve(item);
         }
       });
-    }, { threshold: 0.05, rootMargin: '0px 0px -40px 0px' });
+    }, { threshold: 0.01, rootMargin: '0px 0px 120px 0px' });
 
     document.querySelectorAll('.grid-item').forEach(item => imgObserver.observe(item));
 
