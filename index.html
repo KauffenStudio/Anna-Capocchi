@@ -1,0 +1,1408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Anna Capocchi — Fashion Photography</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@300;400&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ─────────────────────────────────────────
+       RESET & BASE
+    ───────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --white: #ffffff;
+      --black: #0a0a0a;
+      --mid:   #888888;
+      --light: #e8e8e8;
+      --nav-h: 52px;
+      --foot-h: 44px;
+      --font-serif: 'EB Garamond', Georgia, serif;
+      --font-sans:  'DM Sans', 'Helvetica Neue', Arial, sans-serif;
+      --gap: 6px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--white);
+      color: var(--black);
+      font-family: var(--font-sans);
+      font-weight: 300;
+      font-size: 13px;
+      letter-spacing: 0.02em;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+      cursor: none;
+    }
+
+    a { color: inherit; text-decoration: none; cursor: none; }
+    img { display: block; width: 100%; height: 100%; object-fit: cover; }
+
+    /* ─────────────────────────────────────────
+       INTRO LOADER
+    ───────────────────────────────────────── */
+    #loader {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: var(--black);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    }
+
+    #loader .loader-name {
+      font-family: var(--font-serif);
+      font-size: clamp(24px, 4vw, 48px);
+      color: var(--white);
+      font-style: italic;
+      letter-spacing: 0.02em;
+      opacity: 0;
+      transform: translateY(12px);
+      animation: loaderText 0.7s cubic-bezier(0.16,1,0.3,1) 0.2s forwards;
+    }
+
+    @keyframes loaderText {
+      to { opacity: 1; transform: none; }
+    }
+
+    #loader.exit {
+      animation: loaderWipe 0.9s cubic-bezier(0.76, 0, 0.24, 1) 0.3s forwards;
+    }
+
+    @keyframes loaderWipe {
+      0%   { clip-path: inset(0 0 0 0); }
+      100% { clip-path: inset(0 0 100% 0); }
+    }
+
+    /* ─────────────────────────────────────────
+       SCROLL PROGRESS BAR
+    ───────────────────────────────────────── */
+    #progress-bar {
+      position: fixed;
+      top: 0; left: 0;
+      height: 1px;
+      background: var(--black);
+      width: 0%;
+      z-index: 200;
+      transition: width 0.05s linear;
+    }
+
+    /* ─────────────────────────────────────────
+       CUSTOM CURSOR
+    ───────────────────────────────────────── */
+    #cursor {
+      position: fixed;
+      top: 0; left: 0;
+      pointer-events: none;
+      z-index: 8888;
+      mix-blend-mode: difference;
+    }
+
+    #cursor-dot {
+      width: 6px;
+      height: 6px;
+      background: var(--white);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      transition: transform 0.15s ease, width 0.3s cubic-bezier(0.16,1,0.3,1), height 0.3s cubic-bezier(0.16,1,0.3,1);
+    }
+
+    #cursor-ring {
+      position: fixed;
+      top: 0; left: 0;
+      width: 36px;
+      height: 36px;
+      border: 1px solid rgba(255,255,255,0.6);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: 8887;
+      mix-blend-mode: difference;
+      transition: width 0.4s cubic-bezier(0.16,1,0.3,1),
+                  height 0.4s cubic-bezier(0.16,1,0.3,1),
+                  border-color 0.3s ease;
+    }
+
+    #cursor-label {
+      position: fixed;
+      top: 0; left: 0;
+      font-size: 9px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--white);
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: 8889;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      white-space: nowrap;
+      font-family: var(--font-sans);
+      mix-blend-mode: difference;
+    }
+
+    body.cursor-on-image #cursor-dot {
+      width: 0; height: 0;
+    }
+    body.cursor-on-image #cursor-ring {
+      width: 72px;
+      height: 72px;
+      border-color: rgba(255,255,255,0.9);
+    }
+    body.cursor-on-image #cursor-label {
+      opacity: 1;
+    }
+
+    /* ─────────────────────────────────────────
+       NAV
+    ───────────────────────────────────────── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      height: var(--nav-h);
+      background: var(--white);
+      border-bottom: 1px solid var(--light);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 28px;
+      transform: translateY(-100%);
+      opacity: 0;
+    }
+
+    nav.nav-visible {
+      animation: navDrop 0.7s cubic-bezier(0.16,1,0.3,1) forwards;
+    }
+
+    @keyframes navDrop {
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .nav-name {
+      font-family: var(--font-serif);
+      font-size: 15px;
+      font-weight: 400;
+      letter-spacing: 0.01em;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 32px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--black);
+      position: relative;
+      display: inline-block;
+      overflow: hidden;
+    }
+
+    /* Sliding underline on nav links */
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      width: 100%;
+      height: 1px;
+      background: var(--black);
+      transform: scaleX(0);
+      transform-origin: right center;
+      transition: transform 0.35s cubic-bezier(0.76,0,0.24,1);
+    }
+    .nav-links a:hover::after {
+      transform: scaleX(1);
+      transform-origin: left center;
+    }
+    .nav-links a:hover { color: var(--black); }
+
+    /* ─────────────────────────────────────────
+       FOOTER
+    ───────────────────────────────────────── */
+    footer {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      z-index: 100;
+      height: var(--foot-h);
+      background: var(--white);
+      border-top: 1px solid var(--light);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 28px;
+      transform: translateY(100%);
+      opacity: 0;
+    }
+
+    footer.footer-visible {
+      animation: footRise 0.7s cubic-bezier(0.16,1,0.3,1) 0.15s forwards;
+    }
+
+    @keyframes footRise {
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    footer a {
+      font-size: 11px;
+      letter-spacing: 0.10em;
+      text-transform: uppercase;
+      color: var(--black);
+      position: relative;
+      overflow: hidden;
+      display: inline-block;
+    }
+
+    footer a::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      width: 100%;
+      height: 1px;
+      background: var(--black);
+      transform: scaleX(0);
+      transform-origin: right;
+      transition: transform 0.35s cubic-bezier(0.76,0,0.24,1);
+    }
+    footer a:hover::after { transform: scaleX(1); transform-origin: left; }
+    footer a:hover { color: var(--black); }
+
+    .footer-ig {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .footer-ig svg {
+      flex-shrink: 0;
+      transition: transform 0.3s cubic-bezier(0.16,1,0.3,1);
+    }
+    .footer-ig:hover svg {
+      transform: scale(1.15);
+    }
+
+    /* ─────────────────────────────────────────
+       PAGE WRAPPER
+    ───────────────────────────────────────── */
+    .page {
+      padding-top: var(--nav-h);
+      padding-bottom: var(--foot-h);
+    }
+
+    /* ─────────────────────────────────────────
+       HERO
+    ───────────────────────────────────────── */
+    .hero {
+      position: relative;
+      width: 100%;
+      height: calc(100vh - var(--nav-h) - var(--foot-h));
+      overflow: hidden;
+      background: #111;
+    }
+
+    .hero-img-wrap {
+      position: absolute;
+      inset: 0;
+      will-change: transform;
+    }
+
+    .hero img {
+      width: 100%;
+      height: 110%; /* extra for parallax */
+      object-fit: cover;
+      object-position: center 30%;
+      opacity: 0;
+      animation: heroFade 1.4s ease 1.6s forwards;
+      /* Ken Burns subtle drift */
+      animation: heroFade 1.4s ease 1.6s forwards, kenBurns 20s ease-in-out 1.6s infinite alternate;
+    }
+
+    @keyframes heroFade {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    @keyframes kenBurns {
+      from { transform: scale(1) translate(0, 0); }
+      to   { transform: scale(1.04) translate(-0.5%, 0.5%); }
+    }
+
+    /* Hero overlay gradient */
+    .hero::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        to bottom,
+        transparent 40%,
+        rgba(0,0,0,0.55) 100%
+      );
+      pointer-events: none;
+    }
+
+    .hero-caption {
+      position: absolute;
+      bottom: 40px;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      padding: 0 28px;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    .hero-title {
+      font-family: var(--font-serif);
+      font-size: clamp(36px, 7vw, 88px);
+      font-weight: 400;
+      color: var(--white);
+      line-height: 0.92;
+      letter-spacing: -0.01em;
+      overflow: hidden;
+    }
+
+    /* Each line of the title wraps in a clip container */
+    .hero-title .line-wrap {
+      display: block;
+      overflow: hidden;
+    }
+
+    .hero-title .line-inner {
+      display: block;
+      transform: translateY(110%);
+      opacity: 0;
+    }
+
+    .hero-title .line-inner.anim {
+      animation: lineReveal 0.9s cubic-bezier(0.16,1,0.3,1) forwards;
+    }
+    .hero-title .line-wrap:nth-child(2) .line-inner.anim {
+      animation-delay: 0.1s;
+    }
+
+    @keyframes lineReveal {
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .hero-sub {
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.7);
+      text-align: right;
+      opacity: 0;
+      transform: translateY(10px);
+    }
+
+    .hero-sub.anim {
+      animation: fadeUp 0.8s cubic-bezier(0.16,1,0.3,1) 0.25s forwards;
+    }
+
+    @keyframes fadeUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ─────────────────────────────────────────
+       SCROLL INDICATOR
+    ───────────────────────────────────────── */
+    .scroll-hint {
+      position: absolute;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      z-index: 2;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .scroll-hint.anim {
+      animation: fadeUp 0.8s ease 0.5s forwards;
+    }
+
+    .scroll-hint span {
+      font-size: 9px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.5);
+    }
+
+    .scroll-hint-line {
+      width: 1px;
+      height: 0;
+      background: rgba(255,255,255,0.4);
+      animation: lineGrow 1.5s ease 2s infinite;
+    }
+
+    @keyframes lineGrow {
+      0%   { height: 0; opacity: 1; }
+      60%  { height: 32px; opacity: 1; }
+      100% { height: 32px; opacity: 0; }
+    }
+
+    /* ─────────────────────────────────────────
+       WORKS SECTION
+    ───────────────────────────────────────── */
+    #works {
+      padding: 72px 28px 48px;
+    }
+
+    .section-label {
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--mid);
+      margin-bottom: 48px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      overflow: hidden;
+    }
+
+    .section-label-text {
+      display: inline-block;
+      transform: translateY(20px);
+      opacity: 0;
+      transition: transform 0.7s cubic-bezier(0.16,1,0.3,1), opacity 0.7s ease;
+    }
+
+    .section-label.visible .section-label-text {
+      transform: none;
+      opacity: 1;
+    }
+
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--light);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.9s cubic-bezier(0.16,1,0.3,1) 0.2s;
+    }
+
+    .section-label.visible::after {
+      transform: scaleX(1);
+    }
+
+    /* Series */
+    .series {
+      margin-bottom: 64px;
+    }
+
+    .series-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 8px;
+      overflow: hidden;
+    }
+
+    .series-title {
+      font-family: var(--font-serif);
+      font-size: 20px;
+      font-style: italic;
+      font-weight: 400;
+      letter-spacing: 0.01em;
+      transform: translateY(24px);
+      opacity: 0;
+      display: inline-block;
+      transition: transform 0.7s cubic-bezier(0.16,1,0.3,1), opacity 0.7s ease;
+    }
+
+    .series-count {
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--mid);
+      transform: translateY(24px);
+      opacity: 0;
+      transition: transform 0.7s cubic-bezier(0.16,1,0.3,1) 0.1s, opacity 0.7s ease 0.1s;
+    }
+
+    .series.visible .series-title,
+    .series.visible .series-count {
+      transform: none;
+      opacity: 1;
+    }
+
+    /* Grid layouts */
+    .grid {
+      display: grid;
+      gap: var(--gap);
+    }
+
+    .grid-2   { grid-template-columns: 1fr 1fr; }
+    .grid-3   { grid-template-columns: 1fr 1fr 1fr; }
+    .grid-4   { grid-template-columns: 1fr 1fr 1fr 1fr; }
+    .grid-2-1 { grid-template-columns: 2fr 1fr; }
+    .grid-1-2 { grid-template-columns: 1fr 2fr; }
+    .grid-3-1 { grid-template-columns: 3fr 1fr; }
+
+    .grid-item {
+      overflow: hidden;
+      position: relative;
+      cursor: none;
+      background: #f0f0f0;
+      /* Clip-path reveal state */
+      --reveal-progress: 0;
+    }
+
+    /* Wipe reveal on scroll — translateY the wrapper, img loads normally */
+    .grid-item {
+      position: relative;
+      overflow: hidden;
+      background: #f0f0f0;
+    }
+
+    /* img-clip fills parent absolutely so no grey gap ever shows */
+    .grid-item .img-clip {
+      position: absolute;
+      inset: 0;
+      transform: translateY(103%);
+      transition: transform 0s;
+      will-change: transform;
+    }
+
+    .grid-item.img-revealed .img-clip {
+      transform: translateY(0);
+      transition: transform 1.1s cubic-bezier(0.76, 0, 0.24, 1);
+    }
+
+    .grid-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scale(1.1);
+      transition: transform 1.1s cubic-bezier(0.76, 0, 0.24, 1), opacity 0.4s ease;
+      will-change: transform;
+    }
+
+    .grid-item.img-revealed img {
+      transform: scale(1);
+    }
+
+    /* Hover effect */
+    .grid-item:hover img {
+      transform: scale(1.04);
+      opacity: 0.88;
+    }
+
+    /* Hover overlay */
+    .grid-item::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0);
+      transition: background 0.4s ease;
+      pointer-events: none;
+      z-index: 1;
+    }
+    .grid-item:hover::after {
+      background: rgba(0,0,0,0.06);
+    }
+
+    .span-2  { grid-column: span 2; }
+
+    /* Aspect ratios */
+    .ar-4-5  { aspect-ratio: 4/5; }
+    .ar-3-4  { aspect-ratio: 3/4; }
+    .ar-2-3  { aspect-ratio: 2/3; }
+    .ar-16-9 { aspect-ratio: 16/9; }
+    .ar-3-2  { aspect-ratio: 3/2; }
+    .ar-1-1  { aspect-ratio: 1/1; }
+    .ar-5-4  { aspect-ratio: 5/4; }
+
+    /* Full-bleed row */
+    .full-bleed {
+      margin: 0 -28px;
+      display: grid;
+      gap: var(--gap);
+    }
+    .full-bleed.grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+    /* ─────────────────────────────────────────
+       INFO SECTION
+    ───────────────────────────────────────── */
+    #info {
+      padding: 72px 28px 80px;
+      border-top: 1px solid var(--light);
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 48px;
+      margin-top: 48px;
+    }
+
+    .info-col h3 {
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--mid);
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--light);
+    }
+
+    .info-col p,
+    .info-col li {
+      font-size: 13px;
+      line-height: 1.8;
+      color: var(--black);
+      list-style: none;
+    }
+
+    .info-col .edu-entry { margin-bottom: 20px; }
+
+    .info-col .edu-school {
+      font-family: var(--font-serif);
+      font-size: 15px;
+      font-weight: 400;
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    .info-col .edu-degree {
+      font-size: 12px;
+      color: var(--mid);
+      display: block;
+    }
+
+    .info-col .edu-year {
+      font-size: 11px;
+      color: var(--mid);
+      letter-spacing: 0.04em;
+    }
+
+    /* Skill items with fill animation */
+    .info-col .skill-item {
+      padding: 7px 0;
+      border-bottom: 1px solid var(--light);
+      font-size: 13px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .info-col .skill-item::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--black);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.4s cubic-bezier(0.76,0,0.24,1);
+    }
+
+    .info-col .skill-item:hover::before {
+      transform: scaleX(1);
+    }
+
+    .info-col .skill-item span {
+      position: relative;
+      z-index: 1;
+      transition: color 0.4s ease;
+    }
+    .info-col .skill-item:hover span {
+      color: var(--white);
+    }
+
+    .info-col .contact-link {
+      display: block;
+      font-size: 13px;
+      margin-bottom: 8px;
+      transition: opacity 0.2s, letter-spacing 0.3s;
+    }
+    .info-col .contact-link:hover {
+      opacity: 0.5;
+      letter-spacing: 0.06em;
+    }
+
+    .info-statement {
+      grid-column: 1 / -1;
+      max-width: 540px;
+    }
+
+    .info-statement blockquote {
+      font-family: var(--font-serif);
+      font-size: 24px;
+      font-style: italic;
+      line-height: 1.55;
+      color: var(--black);
+    }
+
+    /* Stagger reveal for info cols */
+    .info-col, .info-statement {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.16,1,0.3,1);
+    }
+
+    .info-col.visible, .info-statement.visible {
+      opacity: 1;
+      transform: none;
+    }
+
+    /* ─────────────────────────────────────────
+       LIGHTBOX
+    ───────────────────────────────────────── */
+    #lightbox {
+      position: fixed;
+      inset: 0;
+      z-index: 999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+
+    #lightbox.active {
+      pointer-events: all;
+      opacity: 1;
+    }
+
+    #lb-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(5,5,5,0.95);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      cursor: none;
+    }
+
+    #lightbox-img {
+      position: relative;
+      z-index: 2;
+      max-width: 88vw;
+      max-height: 88vh;
+      object-fit: contain;
+      width: auto;
+      height: auto;
+      cursor: none;
+      transform: scale(0.95);
+      opacity: 0;
+      transition: transform 0.45s cubic-bezier(0.16,1,0.3,1), opacity 0.4s ease;
+    }
+
+    #lightbox.active #lightbox-img {
+      transform: scale(1);
+      opacity: 1;
+    }
+
+    #lightbox-close {
+      position: fixed;
+      top: 24px;
+      right: 28px;
+      color: rgba(255,255,255,0.5);
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      cursor: none;
+      transition: color 0.2s;
+      user-select: none;
+      z-index: 3;
+    }
+    #lightbox-close:hover { color: #fff; }
+
+    #lightbox-nav {
+      position: fixed;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 24px;
+      align-items: center;
+      z-index: 3;
+    }
+
+    #lightbox-nav button {
+      background: none;
+      border: none;
+      color: rgba(255,255,255,0.4);
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      cursor: none;
+      padding: 8px 0;
+      transition: color 0.2s;
+      font-family: var(--font-sans);
+    }
+    #lightbox-nav button:hover { color: #fff; }
+
+    #lightbox-counter {
+      color: rgba(255,255,255,0.25);
+      font-size: 11px;
+      letter-spacing: 0.10em;
+      min-width: 48px;
+      text-align: center;
+    }
+
+    /* ─────────────────────────────────────────
+       RESPONSIVE
+    ───────────────────────────────────────── */
+    @media (max-width: 768px) {
+      body { cursor: auto; }
+      #cursor, #cursor-ring, #cursor-label { display: none; }
+      nav, footer { padding: 0 16px; }
+      #works, #info { padding-left: 16px; padding-right: 16px; }
+      .full-bleed { margin: 0 -16px; }
+      .hero-title { font-size: clamp(32px, 10vw, 56px); }
+      .hero-caption { padding: 0 16px; bottom: 24px; }
+      .grid-3, .grid-4 { grid-template-columns: 1fr 1fr; }
+      .grid-2-1, .grid-1-2 { grid-template-columns: 1fr; }
+      .grid-3-1 { grid-template-columns: 1fr; }
+      .span-2 { grid-column: span 1; }
+      .info-grid { grid-template-columns: 1fr; gap: 32px; }
+      .info-statement { grid-column: 1; }
+      .nav-links { gap: 20px; }
+      a, button { cursor: auto; }
+    }
+
+    @media (max-width: 480px) {
+      .grid-3, .grid-4, .grid-2 { grid-template-columns: 1fr; }
+      .full-bleed.grid-3 { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- LOADER -->
+  <div id="loader">
+    <span class="loader-name">Anna Capocchi</span>
+  </div>
+
+  <!-- SCROLL PROGRESS -->
+  <div id="progress-bar"></div>
+
+  <!-- CUSTOM CURSOR -->
+  <div id="cursor"><div id="cursor-dot"></div></div>
+  <div id="cursor-ring"></div>
+  <div id="cursor-label">View</div>
+
+  <!-- NAV -->
+  <nav id="nav">
+    <a href="#" class="nav-name">Anna Capocchi</a>
+    <ul class="nav-links">
+      <li><a href="#works">Works</a></li>
+      <li><a href="#info">Info</a></li>
+    </ul>
+  </nav>
+
+  <div class="page">
+
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero-img-wrap" id="hero-img-wrap">
+        <img src="../Anna Capocchi/web/ChloeFinal1 2.jpg" alt="Anna Capocchi Photography" id="hero-img" />
+      </div>
+      <div class="hero-caption">
+        <h1 class="hero-title" id="hero-title">
+          <span class="line-wrap"><span class="line-inner">Anna</span></span>
+          <span class="line-wrap"><span class="line-inner">Capocchi</span></span>
+        </h1>
+        <div class="hero-sub" id="hero-sub">
+          Fashion Photography<br>
+          London
+        </div>
+      </div>
+      <div class="scroll-hint" id="scroll-hint">
+        <span>Scroll</span>
+        <div class="scroll-hint-line"></div>
+      </div>
+    </section>
+
+    <!-- WORKS -->
+    <section id="works">
+      <div class="section-label" id="sl-works">
+        <span class="section-label-text">Selected Works</span>
+      </div>
+
+      <!-- SERIES: Chloe -->
+      <div class="series" data-series-block>
+        <div class="series-header">
+          <span class="series-title">Chloe</span>
+          <span class="series-count">04 images</span>
+        </div>
+        <div class="grid grid-2-1" style="margin-bottom: var(--gap);">
+          <div class="grid-item ar-3-2" data-series="chloe" data-index="0">
+            <div class="img-clip"><img src="../Anna Capocchi/web/ChloeFinal1 2.jpg" alt="Chloe — 01" /></div>
+          </div>
+          <div class="grid-item ar-3-2" data-series="chloe" data-index="1">
+            <div class="img-clip"><img src="../Anna Capocchi/web/ChloeFinal2 3.jpg" alt="Chloe — 02" /></div>
+          </div>
+        </div>
+        <div class="grid grid-2">
+          <div class="grid-item ar-3-2" data-series="chloe" data-index="2">
+            <div class="img-clip"><img src="../Anna Capocchi/web/ChloeFinal3 2.jpg" alt="Chloe — 03" /></div>
+          </div>
+          <div class="grid-item ar-3-2" data-series="chloe" data-index="3">
+            <div class="img-clip"><img src="../Anna Capocchi/web/ChloeFinal4 2.jpg" alt="Chloe — 04" /></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SERIES: Garden -->
+      <div class="series" data-series-block>
+        <div class="series-header">
+          <span class="series-title">Garden</span>
+          <span class="series-count">03 images</span>
+        </div>
+        <div class="grid grid-3">
+          <div class="grid-item ar-4-5" data-series="garden" data-index="0">
+            <div class="img-clip"><img src="../Anna Capocchi/web/173A0305.jpg" alt="Garden — 01" /></div>
+          </div>
+          <div class="grid-item ar-4-5" data-series="garden" data-index="1">
+            <div class="img-clip"><img src="../Anna Capocchi/web/173A0312-2.jpg" alt="Garden — 02" /></div>
+          </div>
+          <div class="grid-item ar-4-5" data-series="garden" data-index="2">
+            <div class="img-clip"><img src="../Anna Capocchi/web/173A0321.jpg" alt="Garden — 03" /></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SERIES: Interior -->
+      <div class="series" data-series-block>
+        <div class="series-header">
+          <span class="series-title">Interior</span>
+          <span class="series-count">04 images</span>
+        </div>
+        <div class="grid grid-4">
+          <div class="grid-item ar-3-4" data-series="interior" data-index="0">
+            <div class="img-clip"><img src="../Anna Capocchi/web/DSCF3689.jpg" alt="Interior — 01" /></div>
+          </div>
+          <div class="grid-item ar-3-4" data-series="interior" data-index="1">
+            <div class="img-clip"><img src="../Anna Capocchi/web/DSCF3841.jpg" alt="Interior — 02" /></div>
+          </div>
+          <div class="grid-item ar-3-4" data-series="interior" data-index="2">
+            <div class="img-clip"><img src="../Anna Capocchi/web/DSCF4045.jpg" alt="Interior — 03" /></div>
+          </div>
+          <div class="grid-item ar-3-4" data-series="interior" data-index="3">
+            <div class="img-clip"><img src="../Anna Capocchi/web/DSCF4163.jpg" alt="Interior — 04" /></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SERIES: Street -->
+      <div class="series" data-series-block>
+        <div class="series-header">
+          <span class="series-title">Street</span>
+          <span class="series-count">02 images</span>
+        </div>
+        <div class="grid grid-1-2">
+          <div class="grid-item ar-4-5" data-series="street" data-index="0">
+            <div class="img-clip"><img src="../Anna Capocchi/web/IMG_5631.jpg" alt="Street — 01" /></div>
+          </div>
+          <div class="grid-item ar-4-5" data-series="street" data-index="1">
+            <div class="img-clip"><img src="../Anna Capocchi/web/IMG_5635.jpg" alt="Street — 02" /></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SERIES: Portraits -->
+      <div class="series" data-series-block>
+        <div class="series-header">
+          <span class="series-title">Portraits</span>
+          <span class="series-count">06 images</span>
+        </div>
+        <div class="grid grid-3" style="margin-bottom: var(--gap);">
+          <div class="grid-item ar-4-5" data-series="portraits" data-index="0">
+            <div class="img-clip"><img src="../Anna Capocchi/web/Image 18-03-2026 at 21.09.jpg" alt="Portrait — 01" /></div>
+          </div>
+          <div class="grid-item ar-4-5" data-series="portraits" data-index="1">
+            <div class="img-clip"><img src="../Anna Capocchi/web/Image 18-03-2026 at 21.14.jpg" alt="Portrait — 02" /></div>
+          </div>
+          <div class="grid-item ar-4-5" data-series="portraits" data-index="2">
+            <div class="img-clip"><img src="../Anna Capocchi/web/Image 18-03-2026 at 21.16.jpg" alt="Portrait — 03" /></div>
+          </div>
+        </div>
+        <div class="grid grid-3">
+          <div class="grid-item ar-4-5" data-series="portraits" data-index="3">
+            <div class="img-clip"><img src="../Anna Capocchi/web/Image 18-03-2026 at 21.20.jpg" alt="Portrait — 04" /></div>
+          </div>
+          <div class="grid-item ar-4-5" data-series="portraits" data-index="4">
+            <div class="img-clip"><img src="../Anna Capocchi/web/Image 18-03-2026 at 21.21.jpg" alt="Portrait — 05" /></div>
+          </div>
+          <div class="grid-item ar-4-5" data-series="portraits" data-index="5">
+            <div class="img-clip"><img src="../Anna Capocchi/web/Image 18-03-2026 at 21.29.jpg" alt="Portrait — 06" /></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SERIES: Studies -->
+      <div class="series" data-series-block>
+        <div class="series-header">
+          <span class="series-title">Studies</span>
+          <span class="series-count">02 images</span>
+        </div>
+        <div class="full-bleed grid-3">
+          <div class="grid-item ar-3-2" data-series="studies" data-index="0" style="grid-column: span 2;">
+            <div class="img-clip"><img src="../Anna Capocchi/web/IMG_1439-2.jpg" alt="Studies — 01" /></div>
+          </div>
+          <div class="grid-item ar-3-2" data-series="studies" data-index="1">
+            <div class="img-clip"><img src="../Anna Capocchi/web/Screenshot 2026-01-29 at 18.03.48.jpg" alt="Studies — 02" /></div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- INFO -->
+    <section id="info">
+      <div class="section-label" id="sl-info">
+        <span class="section-label-text">Information</span>
+      </div>
+
+      <div class="info-grid">
+
+        <div class="info-statement">
+          <blockquote>
+            Fashion photography at the intersection of form, identity, and light.
+          </blockquote>
+        </div>
+
+        <div class="info-col">
+          <h3>Education</h3>
+          <div class="edu-entry">
+            <span class="edu-school">London College of Fashion</span>
+            <span class="edu-degree">BA Fashion Photography</span>
+            <span class="edu-year">2024 — Present</span>
+          </div>
+          <div class="edu-entry">
+            <span class="edu-school">Glasgow Clyde College</span>
+            <span class="edu-degree">Fashion Technology</span>
+            <span class="edu-year">2022 — 2023</span>
+          </div>
+        </div>
+
+        <div class="info-col">
+          <h3>Skills</h3>
+          <ul>
+            <li class="skill-item"><span>Adobe Lightroom</span></li>
+            <li class="skill-item"><span>Adobe Photoshop</span></li>
+            <li class="skill-item"><span>Adobe InDesign</span></li>
+            <li class="skill-item"><span>Adobe Premiere Pro</span></li>
+          </ul>
+        </div>
+
+        <div class="info-col">
+          <h3>Contact</h3>
+          <a href="mailto:annaccapocchiphoto@outlook.com" class="contact-link">
+            annaccapocchiphoto@outlook.com
+          </a>
+          <a href="https://instagram.com/annaccapocchiphoto" target="_blank" class="contact-link">
+            @annaccapocchiphoto ↗
+          </a>
+        </div>
+
+      </div>
+    </section>
+
+  </div><!-- .page -->
+
+  <!-- FOOTER -->
+  <footer id="footer">
+    <a href="mailto:annaccapocchiphoto@outlook.com">annaccapocchiphoto@outlook.com</a>
+    <a href="https://instagram.com/annaccapocchiphoto" target="_blank" class="footer-ig">
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+        <circle cx="12" cy="12" r="4.5"/>
+        <circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" stroke="none"/>
+      </svg>
+      <span>@annaccapocchiphoto</span>
+    </a>
+  </footer>
+
+  <!-- LIGHTBOX -->
+  <div id="lightbox" role="dialog" aria-modal="true" aria-label="Image viewer">
+    <div id="lb-backdrop"></div>
+    <span id="lightbox-close">Close</span>
+    <img id="lightbox-img" src="" alt="" />
+    <div id="lightbox-nav">
+      <button id="lb-prev">← Prev</button>
+      <span id="lightbox-counter">1 / 1</span>
+      <button id="lb-next">Next →</button>
+    </div>
+  </div>
+
+  <script>
+  (function() {
+
+    /* ══════════════════════════════════════
+       LOADER
+    ══════════════════════════════════════ */
+    const loader = document.getElementById('loader');
+
+    function finishLoad() {
+      loader.classList.add('exit');
+      loader.addEventListener('animationend', () => {
+        loader.style.display = 'none';
+      }, { once: true });
+
+      // Trigger nav + footer + hero animations
+      document.getElementById('nav').classList.add('nav-visible');
+      document.getElementById('footer').classList.add('footer-visible');
+
+      // Hero title lines
+      setTimeout(() => {
+        document.querySelectorAll('#hero-title .line-inner').forEach(el => {
+          el.classList.add('anim');
+        });
+        document.getElementById('hero-sub').classList.add('anim');
+        document.getElementById('scroll-hint').classList.add('anim');
+      }, 200);
+    }
+
+    // Wait for fonts + a minimum duration
+    const minWait = new Promise(res => setTimeout(res, 1400));
+    const fontWait = document.fonts ? document.fonts.ready : Promise.resolve();
+    Promise.all([minWait, fontWait]).then(finishLoad);
+
+
+    /* ══════════════════════════════════════
+       CUSTOM CURSOR
+    ══════════════════════════════════════ */
+    const cursorDot   = document.getElementById('cursor-dot');
+    const cursorEl    = document.getElementById('cursor');
+    const cursorRing  = document.getElementById('cursor-ring');
+    const cursorLabel = document.getElementById('cursor-label');
+
+    let mouseX = -200, mouseY = -200;
+    let ringX  = -200, ringY  = -200;
+
+    document.addEventListener('mousemove', (e) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+      cursorEl.style.transform = `translate(${mouseX}px, ${mouseY}px)`;
+      cursorLabel.style.transform = `translate(${mouseX}px, ${mouseY}px)`;
+    });
+
+    // Lerp ring for lag effect
+    function animateCursor() {
+      ringX += (mouseX - ringX) * 0.12;
+      ringY += (mouseY - ringY) * 0.12;
+      cursorRing.style.transform = `translate(${ringX}px, ${ringY}px) translate(-50%, -50%)`;
+      requestAnimationFrame(animateCursor);
+    }
+    animateCursor();
+
+    // Image hover states
+    document.querySelectorAll('.grid-item').forEach(item => {
+      item.addEventListener('mouseenter', () => {
+        document.body.classList.add('cursor-on-image');
+      });
+      item.addEventListener('mouseleave', () => {
+        document.body.classList.remove('cursor-on-image');
+      });
+    });
+
+
+    /* ══════════════════════════════════════
+       SCROLL PROGRESS BAR
+    ══════════════════════════════════════ */
+    const progressBar = document.getElementById('progress-bar');
+    function updateProgress() {
+      const scrollTop = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+      progressBar.style.width = pct + '%';
+    }
+    window.addEventListener('scroll', updateProgress, { passive: true });
+
+
+    /* ══════════════════════════════════════
+       HERO PARALLAX
+    ══════════════════════════════════════ */
+    const heroWrap = document.getElementById('hero-img-wrap');
+    function updateParallax() {
+      if (!heroWrap) return;
+      const scrollY = window.scrollY;
+      // move image up at 40% of scroll speed
+      heroWrap.style.transform = `translateY(${scrollY * 0.38}px)`;
+    }
+    window.addEventListener('scroll', updateParallax, { passive: true });
+
+
+    /* ══════════════════════════════════════
+       SECTION LABELS REVEAL
+    ══════════════════════════════════════ */
+    const labelObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          labelObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.2 });
+
+    document.querySelectorAll('.section-label').forEach(el => labelObserver.observe(el));
+
+
+    /* ══════════════════════════════════════
+       SERIES HEADERS REVEAL
+    ══════════════════════════════════════ */
+    const seriesObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          seriesObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('[data-series-block]').forEach(el => seriesObserver.observe(el));
+
+
+    /* ══════════════════════════════════════
+       IMAGE CLIP-PATH REVEAL ON SCROLL
+    ══════════════════════════════════════ */
+    const imgObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry, i) => {
+        if (entry.isIntersecting) {
+          const item = entry.target;
+          // stagger within view
+          const delay = (parseInt(item.dataset.index || '0', 10) % 4) * 80;
+          setTimeout(() => {
+            item.classList.add('img-revealed');
+          }, delay);
+          imgObserver.unobserve(item);
+        }
+      });
+    }, { threshold: 0.05, rootMargin: '0px 0px -40px 0px' });
+
+    document.querySelectorAll('.grid-item').forEach(item => imgObserver.observe(item));
+
+
+    /* ══════════════════════════════════════
+       INFO SECTION REVEAL
+    ══════════════════════════════════════ */
+    const infoObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          infoObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.info-col, .info-statement').forEach((el, i) => {
+      el.style.transitionDelay = `${i * 0.1}s`;
+      infoObserver.observe(el);
+    });
+
+
+    /* ══════════════════════════════════════
+       LIGHTBOX
+    ══════════════════════════════════════ */
+    const lb        = document.getElementById('lightbox');
+    const lbImg     = document.getElementById('lightbox-img');
+    const lbClose   = document.getElementById('lightbox-close');
+    const lbCounter = document.getElementById('lightbox-counter');
+    const lbPrev    = document.getElementById('lb-prev');
+    const lbNext    = document.getElementById('lb-next');
+    const lbBackdrop = document.getElementById('lb-backdrop');
+
+    const allItems = [];
+
+    document.querySelectorAll('.grid-item').forEach(item => {
+      const series = item.dataset.series;
+      const index  = parseInt(item.dataset.index, 10);
+      const src    = item.querySelector('img').src;
+      const alt    = item.querySelector('img').alt;
+      allItems.push({ src, alt, series, index });
+    });
+
+    let currentAll = 0;
+
+    function openLightbox(allIndex) {
+      currentAll = allIndex;
+      lbImg.src = allItems[currentAll].src;
+      lbImg.alt = allItems[currentAll].alt;
+      lb.classList.add('active');
+      document.body.style.overflow = 'hidden';
+      updateCounter();
+    }
+
+    function closeLightbox() {
+      lb.classList.remove('active');
+      document.body.style.overflow = '';
+      setTimeout(() => { lbImg.src = ''; }, 400);
+    }
+
+    function updateCounter() {
+      lbCounter.textContent = `${currentAll + 1} / ${allItems.length}`;
+    }
+
+    function navigate(dir) {
+      currentAll = (currentAll + dir + allItems.length) % allItems.length;
+
+      // Slide transition on the image
+      const slideOut = dir > 0 ? -60 : 60;
+      lbImg.style.transition = 'transform 0.25s ease, opacity 0.25s ease';
+      lbImg.style.transform = `translateX(${slideOut}px)`;
+      lbImg.style.opacity = '0';
+
+      setTimeout(() => {
+        lbImg.src = allItems[currentAll].src;
+        lbImg.style.transition = 'none';
+        lbImg.style.transform = `translateX(${-slideOut}px)`;
+        lbImg.style.opacity = '0';
+        void lbImg.offsetWidth;
+        lbImg.style.transition = 'transform 0.35s cubic-bezier(0.16,1,0.3,1), opacity 0.3s ease';
+        lbImg.style.transform = 'translateX(0)';
+        lbImg.style.opacity = '1';
+        updateCounter();
+      }, 250);
+    }
+
+    document.querySelectorAll('.grid-item').forEach((item) => {
+      item.addEventListener('click', () => {
+        const series = item.dataset.series;
+        const idx    = parseInt(item.dataset.index, 10);
+        const allIndex = allItems.findIndex(a => a.series === series && a.index === idx);
+        openLightbox(allIndex);
+      });
+    });
+
+    lbBackdrop.addEventListener('click', closeLightbox);
+    lbClose.addEventListener('click', closeLightbox);
+    lbPrev.addEventListener('click', (e) => { e.stopPropagation(); navigate(-1); });
+    lbNext.addEventListener('click', (e) => { e.stopPropagation(); navigate(1); });
+
+    document.addEventListener('keydown', (e) => {
+      if (!lb.classList.contains('active')) return;
+      if (e.key === 'Escape')     closeLightbox();
+      if (e.key === 'ArrowLeft')  navigate(-1);
+      if (e.key === 'ArrowRight') navigate(1);
+    });
+
+    // Swipe support on lightbox
+    let touchStartX = 0;
+    lb.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive: true });
+    lb.addEventListener('touchend', e => {
+      const dx = e.changedTouches[0].clientX - touchStartX;
+      if (Math.abs(dx) > 50) navigate(dx < 0 ? 1 : -1);
+    }, { passive: true });
+
+  })();
+  </script>
+</body>
+</html>
