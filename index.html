@@ -279,6 +279,33 @@
     footer a:hover::after { transform: scaleX(1); transform-origin: left; }
     footer a:hover { color: var(--black); }
 
+    .footer-crafted {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    .footer-crafted::after { display: none; }
+    .crafted-logo {
+      width: 18px;
+      height: 18px;
+      display: flex;
+      flex-shrink: 0;
+    }
+    .crafted-logo svg { width: 100%; height: 100%; }
+    .crafted-ring-a {
+      animation: craftedSpinA 12s linear infinite;
+      transform-origin: center;
+    }
+    .crafted-ring-b {
+      animation: craftedSpinB 8s linear infinite reverse;
+      transform-origin: center;
+    }
+    @keyframes craftedSpinA { to { transform: rotate(360deg); } }
+    @keyframes craftedSpinB { to { transform: rotate(360deg); } }
+
     .footer-ig {
       display: flex;
       align-items: center;
@@ -1104,6 +1131,16 @@
   <!-- FOOTER -->
   <footer id="footer">
     <a href="mailto:annaccapocchiphoto@outlook.com">annaccapocchiphoto@outlook.com</a>
+    <a href="https://kauffen.com" target="_blank" rel="noopener" class="footer-crafted">
+      <span class="crafted-logo" aria-hidden="true">
+        <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="16" cy="16" r="12" stroke="currentColor" stroke-width="0.9" stroke-dasharray="4 6.5" class="crafted-ring-a"/>
+          <circle cx="16" cy="16" r="6.5" stroke="currentColor" stroke-width="1.1" stroke-dasharray="5.5 5" class="crafted-ring-b"/>
+          <circle cx="16" cy="16" r="1.6" fill="currentColor"/>
+        </svg>
+      </span>
+      <span>Crafted by Kauffen Studios</span>
+    </a>
     <a href="https://instagram.com/annaccapocchiphoto" target="_blank" class="footer-ig">
       <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
